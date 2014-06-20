@@ -9,7 +9,7 @@ mockFS({
     })
 });
 
-describe("Test suite for cani", function() {
+describe("Test suite for prepend-file", function() {
     it("should return proper boolean values", function() {
         pf('./foo', "Hello", function(done) {
             assert(done === true);

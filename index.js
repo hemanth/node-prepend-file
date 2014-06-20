@@ -3,9 +3,9 @@ var fs = require('fs');
 
 module.exports = function(fileName, text, opts, cb) {
     if (!text) throw new Error("No data supplied");
-    if (arguments.length == 2) {
+    if (arguments.length == 3) {
         if (Object.prototype.toString.call(opts) == "[object Function]") {
-            callback = opts;
+            cb = opts;
         } else {
             throw new Error("Callback missing!");
         }
