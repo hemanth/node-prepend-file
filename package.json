@@ -1,0 +1,30 @@
+{
+    "name": "prepend-file",
+    "version": "0.1.0",
+    "description": "Prepend data to a file.",
+    "license": "MIT",
+    "repository": "hemanth/node-prepend-file",
+    "author": {
+        "name": "Hemanth.HM",
+        "email": "hemanth.hm@gmail.com",
+        "url": "http://h3manth.com"
+    },
+    "engines": {
+        "node": ">=0.10.0"
+    },
+    "scripts": {
+        "test": "mocha"
+    },
+    "files": [
+        "index.js"
+    ],
+    "keywords": [
+        "fs",
+        "file",
+        "prepend"
+    ],
+    "devDependencies": {
+        "mocha": "*",
+        "mock-fs": "^2.3.1"
+    }
+}
