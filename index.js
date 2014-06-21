@@ -14,14 +14,16 @@ module.exports = function(fileName, text, opts, cb) {
     }
     fs.readFile(fileName, 'utf8', function(err, data) {
         if (err) {
-            return cb(err);
+            cb(err);
         } else {
             fs.unlinkSync(fileName);
             fs.writeFile(fileName, text + data, function(err) {
                 if (err) {
-                    return cb(err);
+                    cb(err);
+                } else {
+                    cb(true);
                 }
-                return cb(true);
+
             });
         }
     });
