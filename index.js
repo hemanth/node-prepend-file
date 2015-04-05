@@ -17,7 +17,7 @@ function cutTmp(src, dest, opts, cb) {
     });
 }
 
-module.exports = function(filename, data, opts, cb) {
+module.exports = function prependFile(filename, data, opts, cb) {
   if (typeof filename !== 'string') {
     throw new TypeError('path must be a string');
   }
@@ -66,4 +66,29 @@ module.exports = function(filename, data, opts, cb) {
       });
     }
   });
+};
+
+module.exports.sync = function sync(filename, data, opts) {
+  if (typeof filename !== 'string') {
+    throw new TypeError('path must be a string');
+  }
+
+  var oldData;
+
+  opts = assign({
+    encoding: 'utf8',
+    mode: 438
+  }, opts);
+  var appendOpts = clone(opts);
+  appendOpts.flags = 'w';
+
+  var exists = fs.existsSync(filename);
+
+  if (exists) {
+    oldData = fs.readFileSync(filename, opts);
+  } else {
+    oldData = '';
+  }
+
+  fs.writeFileSync(filename, data + oldData, appendOpts);
 };
