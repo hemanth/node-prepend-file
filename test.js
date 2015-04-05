@@ -1,18 +1,28 @@
 var assert = require('assert');
+var fs = require('fs');
 var pf = require('./index');
-var mockFS = require('mock-fs');
 
-mockFS({
-  foo: mockFS.file({
-    content: 'Hemanth',
-    mode: 0400
-  })
-});
+describe('prepend-file', function() {
+  var tmp = '.temp';
+  it('should create the file if it not yet exists.', function(cb) {
+    pf(tmp, 'Hello', function(err) {
+      if (err) {
+        cb(err);
+      }
+      var content = fs.readFileSync(tmp).toString();
+      assert.equal(content, 'Hello');
+      cb();
+    });
+  });
 
-describe('Test suite for prepend-file', function() {
-  it('should return proper boolean values', function() {
-    pf('./foo', 'Hello', function(done) {
-      assert(done === true);
+  it('should prepend the file if it exists', function(cb) {
+    pf(tmp, 'What', function(err) {
+      if (err) {
+        cb(err);
+      }
+      var content = fs.readFileSync(tmp).toString();
+      assert.equal(content, 'WhatHello');
+      fs.unlink(tmp, cb);
     });
   });
 });
