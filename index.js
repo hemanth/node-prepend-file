@@ -17,19 +17,18 @@ function cutTmp(src, dest, opts, cb) {
     });
 }
 
-module.exports = function(fileName, text, opts, cb) {
-  if (!text) {
-    throw new Error('No data supplied');
+module.exports = function(filename, data, opts, cb) {
+  if (typeof filename !== 'string') {
+    throw new TypeError('path must be a string');
   }
-  if (arguments.length === 3) {
-    if (Object.prototype.toString.call(opts) === '[object Function]') {
-      cb = opts;
-    } else {
-      throw new Error('Callback missing!');
-    }
+  if (typeof opts === 'function') {
+    cb = opts;
+    opts = {};
+  } else {
+    cb = cb || cb;
   }
 
-  var tmp = process.env.TMPDIR + fileName;
+  var tmp = process.env.TMPDIR + filename;
 
   opts = assign({
     encoding: 'utf8',
@@ -38,14 +37,14 @@ module.exports = function(fileName, text, opts, cb) {
   var appendOpts = clone(opts);
   appendOpts.flags = 'a';
 
-  fs.exists(fileName, function(exists) {
+  fs.exists(filename, function(exists) {
     if (exists) {
-      fs.writeFile(tmp, text, opts, function(err) {
+      fs.writeFile(tmp, data, opts, function(err) {
         if (err) {
           cb(err);
         }
 
-        fs.createReadStream(fileName, opts)
+        fs.createReadStream(filename, opts)
           .on('error', function(err) {
             cb(err);
           })
@@ -54,11 +53,11 @@ module.exports = function(fileName, text, opts, cb) {
             cb(err);
           })
           .on('finish', function() {
-            cutTmp(tmp, fileName, opts, cb);
+            cutTmp(tmp, filename, opts, cb);
           });
       });
     } else {
-      fs.writeFile(fileName, text, opts, function(err) {
+      fs.writeFile(filename, data, opts, function(err) {
         if (err) {
           cb(err);
         } else {
