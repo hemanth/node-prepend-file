@@ -4,6 +4,11 @@ var pf = require('./index');
 
 describe('prepend-file', function() {
   var tmp = '.temp';
+
+  after(function(cb) {
+    fs.unlink(tmp, cb);
+  });
+
   it('should create the file if it not yet exists.', function(cb) {
     pf(tmp, 'Hello', function(err) {
       if (err) {
@@ -22,7 +27,7 @@ describe('prepend-file', function() {
       }
       var content = fs.readFileSync(tmp).toString();
       assert.equal(content, 'WhatHello');
-      fs.unlink(tmp, cb);
+      cb();
     });
   });
 });
