@@ -3,16 +3,16 @@ var pf = require('./index');
 var mockFS = require('mock-fs');
 
 mockFS({
-    foo: mockFS.file({
-        content: "Hemanth",
-        mode: 0400
-    })
+  foo: mockFS.file({
+    content: 'Hemanth',
+    mode: 0400
+  })
 });
 
-describe("Test suite for prepend-file", function() {
-    it("should return proper boolean values", function() {
-        pf('./foo', "Hello", function(done) {
-            assert(done === true);
-        });
+describe('Test suite for prepend-file', function() {
+  it('should return proper boolean values', function() {
+    pf('./foo', 'Hello', function(done) {
+      assert(done === true);
     });
+  });
 });
