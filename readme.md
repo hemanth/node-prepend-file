@@ -1,6 +1,6 @@
 # prepend-file [![Build Status](https://travis-ci.org/hemanth/node-prepend-file.svg?branch=master)](https://travis-ci.org/hemanth/node-prepend-file)
 
->Prepend data to a file.
+> Prepend data to a file, creating the file if it not yet exists.
 
 
 ## Install
