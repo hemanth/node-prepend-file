@@ -1,4 +1,4 @@
-#  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage Status][coverall-image]][coverall-url]
+#  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
 
 > Prepend data to a file, creating the file if it not yet exists.
 
@@ -54,5 +54,5 @@ MIT © [Hemanth.HM](http://h3manth.com)
 [travis-url]: https://travis-ci.org/hemanth/node-prepend-file
 [daviddm-image]: https://david-dm.org/hemanth/node-prepend-file.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/hemanth/node-prepend-file
-[coverall-image]: https://coveralls.io/repos/hemanth/node-prepend-file/badge.svg
-[coverall-url]: https://coveralls.io/r/hemanth/node-prepend-file
+[coveralls-image]: https://coveralls.io/repos/hemanth/node-prepend-file/badge.svg
+[coveralls-url]: https://coveralls.io/r/hemanth/node-prepend-file
