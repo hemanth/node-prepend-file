@@ -13,6 +13,8 @@
     "node": ">=0.10.0"
   },
   "scripts": {
+    "coverage": "istanbul cover _mocha -- -R spec && rm -rf ./coverage",
+    "lint": "jshint *.js --exclude node_modules",
     "test": "mocha"
   },
   "files": [
@@ -24,6 +26,9 @@
     "prepend"
   ],
   "devDependencies": {
+    "coveralls": "^2.11.2",
+    "istanbul": "^0.3.13",
+    "jshint": "^2.6.3",
     "mocha": "*"
   },
   "dependencies": {
