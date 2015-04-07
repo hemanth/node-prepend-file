@@ -68,34 +68,33 @@ module.exports = function prependFile(path, data, options) {
     flags: 'a'
   };
 
-  fs.exists(path, function(exists) {
-    if (exists) {
-      fs.writeFile(tmp, data, options, function(err) {
-        if (err) {
-          callback(err);
-        }
-
-        fs.createReadStream(path, options)
-          .on('error', function(err) {
-            callback(err);
-          })
-          .pipe(fs.createWriteStream(tmp, appendOptions))
-          .on('error', function(err) {
-            callback(err);
-          })
-          .on('finish', function() {
-            cutTmp(tmp, path, options, callback);
-          });
-      });
-    } else {
-      fs.writeFile(path, data, options, function(err) {
-        if (err) {
-          callback(err);
-        } else {
-          callback();
-        }
-      });
+  // a temp file is written even if dist file does not exist. PR welcome for better implementation.
+  fs.writeFile(tmp, data, options, function(err) {
+    if (err) {
+      callback(err);
     }
+
+    fs.createReadStream(path, options)
+      .on('error', function(err) {
+        if (err.code === 'ENOENT' /*file does not exist*/) {
+          fs.writeFile(path, data, options, function(err) {
+            if (err) {
+              callback(err);
+            } else {
+              callback();
+            }
+          });
+        } else {
+          callback(err);
+        }
+      })
+      .pipe(fs.createWriteStream(tmp, appendOptions))
+      .on('error', function(err) {
+        callback(err);
+      })
+      .on('finish', function() {
+        cutTmp(tmp, path, options, callback);
+      });
   });
 };
 
@@ -122,11 +121,9 @@ module.exports.sync = function sync(path, data, options) {
     flags: 'w'
   };
 
-  var exists = fs.existsSync(path);
-
-  if (exists) {
+  try {
     currentFileData = fs.readFileSync(path, options);
-  } else {
+  } catch (err) {
     currentFileData = '';
   }
 
