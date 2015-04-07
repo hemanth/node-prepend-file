@@ -11,24 +11,24 @@ $ npm install --save prepend-file
 
 ## Usage
 
-##### Node.js
-
 ```js
-var pf = require('prepend-file');
+var prependFile = require('prepend-file');
 
-pf('/etc/passwd', 'perms', function(err){
-	if(err){
+prependFile('message.txt', 'data to prepend', function(err) {
+	if (err) {
 		// Error
 	}
 
 	// Success
-})
+	console.log('The "data to prepend" was prepended to file!');
+});
 ```
+
 ## API
 
-```
-pf(filename, data, [options], callback)
+### prependFile(filename, data, [options], callback)
 
+```
     * filename String
     * data String | Buffer
     * options Object
@@ -36,6 +36,10 @@ pf(filename, data, [options], callback)
         mode Number default = 438 (aka 0666 in Octal)
     * callback Function
 ```
+
+### prependFile.sync(filename, data, [options])
+
+The synchronous version of prependFile. Returns undefined.
 
 ## License
 
