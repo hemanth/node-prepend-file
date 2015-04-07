@@ -26,7 +26,7 @@ function rethrow() {
 }
 
 function maybeCallback(callback) {
-  return util.isFunction(callback) ? callback : rethrow();
+  return typeof callback === 'function' ? callback : rethrow();
 }
 
 function cutTmp(src, dest, options, callback) {
@@ -46,7 +46,7 @@ function cutTmp(src, dest, options, callback) {
 module.exports = function prependFile(path, data, options) {
   var callback = maybeCallback(arguments[arguments.length - 1]);
 
-  if (util.isFunction(options) || !options) {
+  if (typeof options === 'function' || !options) {
     options = {
       encoding: 'utf8',
       mode: 438 /*=0666*/
