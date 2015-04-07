@@ -1,18 +1,53 @@
 var assert = require('assert');
-var pf = require('./index');
-var mockFS = require('mock-fs');
+var fs = require('fs');
+var pf = require('./');
 
-mockFS({
-    foo: mockFS.file({
-        content: "Hemanth",
-        mode: 0400
-    })
+describe('prependFile', function() {
+  var tmp = '.temp';
+
+  after(function(cb) {
+    fs.unlink(tmp, cb);
+  });
+
+  it('should create the file if it not yet exists', function(cb) {
+    pf(tmp, 'Hello', function(err) {
+      if (err) {
+        cb(err);
+      }
+      var content = fs.readFileSync(tmp).toString();
+      assert.equal(content, 'Hello');
+      cb();
+    });
+  });
+
+  it('should prepend the file if it exists', function(cb) {
+    pf(tmp, 'What', function(err) {
+      if (err) {
+        cb(err);
+      }
+      var content = fs.readFileSync(tmp).toString();
+      assert.equal(content, 'WhatHello');
+      cb();
+    });
+  });
 });
 
-describe("Test suite for prepend-file", function() {
-    it("should return proper boolean values", function() {
-        pf('./foo', "Hello", function(done) {
-            assert(done === true);
-        });
-    });
+describe('prependFile.sync', function() {
+  var tmp = '.temp';
+
+  after(function(cb) {
+    fs.unlink(tmp, cb);
+  });
+
+  it('should create the file if it not yet exists', function() {
+    pf.sync(tmp, 'Hello');
+    var content = fs.readFileSync(tmp).toString();
+    assert.equal(content, 'Hello');
+  });
+
+  it('should prepend the file if it exists', function() {
+    pf.sync(tmp, 'What');
+    var content = fs.readFileSync(tmp).toString();
+    assert.equal(content, 'WhatHello');
+  });
 });

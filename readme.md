@@ -1,6 +1,6 @@
 # prepend-file [![Build Status](https://travis-ci.org/hemanth/node-prepend-file.svg?branch=master)](https://travis-ci.org/hemanth/node-prepend-file)
 
->Prepend data to a file.
+> Prepend data to a file, creating the file if it not yet exists.
 
 
 ## Install
@@ -16,10 +16,12 @@ $ npm install --save prepend-file
 ```js
 var pf = require('prepend-file');
 
-pf('/etc/passwd', 'perms', function(done){
-	if(done){
-		console.log("Data prepended!");
+pf('/etc/passwd', 'perms', function(err){
+	if(err){
+		// Error
 	}
+
+	// Success
 })
 ```
 ## API
@@ -32,7 +34,6 @@ pf(filename, data, [options], callback)
     * options Object
         encoding String | Null default = 'utf8'
         mode Number default = 438 (aka 0666 in Octal)
-        flag String default = 'w'
     * callback Function
 ```
 
