@@ -37,6 +37,8 @@ prependFile('message.txt', 'data to prepend', function(err) {
     * callback Function
 ```
 
+Asynchronously prepend data to a file, creating the file if it not yet exists. data can be a string or a buffer.
+
 ### prependFile.sync(filename, data, [options])
 
 The synchronous version of prependFile. Returns undefined.

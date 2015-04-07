@@ -1,94 +1,134 @@
 'use strict';
-var assign = require('lodash.assign');
-var clone = require('lodash.clone');
 var fs = require('fs');
+var util = require('util');
 
-function cutTmp(src, dest, opts, cb) {
-  fs.createReadStream(src, opts)
+var DEBUG = process.env.NODE_DEBUG && /fs/.test(process.env.NODE_DEBUG);
+
+function rethrow() {
+  // Only enable in debug mode. A backtrace uses ~1000 bytes of heap space and is fairly slow to generate.
+  if (DEBUG) {
+    var backtrace = new Error();
+    return function(err) {
+      if (err) {
+        backtrace.stack = err.name + ': ' + err.message +
+          backtrace.stack.substr(backtrace.name.length);
+        err = backtrace;
+        throw err;
+      }
+    };
+  }
+
+  return function(err) {
+    if (err) {
+      throw err; // Forgot a callback but don't know where? Use NODE_DEBUG=fs
+    }
+  };
+}
+
+function maybeCallback(callback) {
+  return util.isFunction(callback) ? callback : rethrow();
+}
+
+function cutTmp(src, dest, options, callback) {
+  fs.createReadStream(src, options)
     .on('error', function(err) {
-      cb(err);
+      callback(err);
     })
-    .pipe(fs.createWriteStream(dest, opts))
+    .pipe(fs.createWriteStream(dest, options))
     .on('error', function(err) {
-      cb(err);
+      callback(err);
     })
     .on('finish', function() {
-      fs.unlink(src, cb);
+      fs.unlink(src, callback);
     });
 }
 
-module.exports = function prependFile(filename, data, opts, cb) {
-  if (typeof filename !== 'string') {
-    throw new TypeError('path must be a string');
+module.exports = function prependFile(path, data, options) {
+  var callback = maybeCallback(arguments[arguments.length - 1]);
+
+  if (util.isFunction(options) || !options) {
+    options = {
+      encoding: 'utf8',
+      mode: 438 /*=0666*/
+    };
+  } else if (util.isString(options)) {
+    options = {
+      encoding: options,
+      mode: 438
+    };
+  } else if (!util.isObject(options)) {
+    throw new TypeError('Bad arguments');
   }
-  if (typeof opts === 'function') {
-    cb = opts;
-    opts = {};
-  } else {
-    cb = cb || cb;
-  }
 
-  var tmp = process.env.TMPDIR + filename;
+  var tmp = process.env.TMPDIR + path;
 
-  opts = assign({
-    encoding: 'utf8',
-    mode: 438
-  }, opts);
-  var appendOpts = clone(opts);
-  appendOpts.flags = 'a';
+  var appendOptions = {
+    encoding: options.encoding,
+    mode: options.mode,
+    flags: 'a'
+  };
 
-  fs.exists(filename, function(exists) {
+  fs.exists(path, function(exists) {
     if (exists) {
-      fs.writeFile(tmp, data, opts, function(err) {
+      fs.writeFile(tmp, data, options, function(err) {
         if (err) {
-          cb(err);
+          callback(err);
         }
 
-        fs.createReadStream(filename, opts)
+        fs.createReadStream(path, options)
           .on('error', function(err) {
-            cb(err);
+            callback(err);
           })
-          .pipe(fs.createWriteStream(tmp, appendOpts))
+          .pipe(fs.createWriteStream(tmp, appendOptions))
           .on('error', function(err) {
-            cb(err);
+            callback(err);
           })
           .on('finish', function() {
-            cutTmp(tmp, filename, opts, cb);
+            cutTmp(tmp, path, options, callback);
           });
       });
     } else {
-      fs.writeFile(filename, data, opts, function(err) {
+      fs.writeFile(path, data, options, function(err) {
         if (err) {
-          cb(err);
+          callback(err);
         } else {
-          cb();
+          callback();
         }
       });
     }
   });
 };
 
-module.exports.sync = function sync(filename, data, opts) {
-  if (typeof filename !== 'string') {
-    throw new TypeError('path must be a string');
+module.exports.sync = function sync(path, data, options) {
+  if (!options) {
+    options = {
+      encoding: 'utf8',
+      mode: 438 /*=0666*/
+    };
+  } else if (util.isString(options)) {
+    options = {
+      encoding: options,
+      mode: 438
+    };
+  } else if (!util.isObject(options)) {
+    throw new TypeError('Bad arguments');
   }
 
-  var oldData;
+  var currentFileData;
 
-  opts = assign({
-    encoding: 'utf8',
-    mode: 438
-  }, opts);
-  var appendOpts = clone(opts);
-  appendOpts.flags = 'w';
+  var appendOptions = {
+    encoding: options.encoding,
+    mode: options.mode,
+    flags: 'w'
+  };
 
-  var exists = fs.existsSync(filename);
+  var exists = fs.existsSync(path);
 
   if (exists) {
-    oldData = fs.readFileSync(filename, opts);
+    currentFileData = fs.readFileSync(path, options);
   } else {
-    oldData = '';
+    currentFileData = '';
   }
 
-  fs.writeFileSync(filename, data + oldData, appendOpts);
+  fs.writeFileSync(path, data + currentFileData, appendOptions);
 };

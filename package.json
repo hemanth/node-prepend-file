@@ -30,9 +30,5 @@
     "istanbul": "^0.3.13",
     "jshint": "^2.6.3",
     "mocha": "*"
-  },
-  "dependencies": {
-    "lodash.assign": "^3.0.0",
-    "lodash.clone": "^3.0.1"
   }
 }
