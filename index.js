@@ -72,6 +72,7 @@ module.exports = function prependFile(path, data, options) {
   fs.writeFile(tmp, data, options, function(err) {
     if (err) {
       callback(err);
+      return;
     }
 
     fs.createReadStream(path, options)
