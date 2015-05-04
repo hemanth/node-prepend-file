@@ -14,7 +14,7 @@
   },
   "scripts": {
     "coverage": "istanbul cover _mocha -- -R spec && rm -rf ./coverage",
-    "lint": "jshint *.js --exclude node_modules",
+    "lint": "jshint *.js --exclude node_modules && jscs *.js",
     "test": "mocha"
   },
   "files": [
@@ -28,6 +28,7 @@
   "devDependencies": {
     "coveralls": "^2.11.2",
     "istanbul": "^0.3.13",
+    "jscs": "^1.13.1",
     "jshint": "^2.6.3",
     "mocha": "*"
   }
