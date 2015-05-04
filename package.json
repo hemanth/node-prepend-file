@@ -1,6 +1,6 @@
 {
   "name": "prepend-file",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Prepend data to a file, creating the file if it not yet exists.",
   "license": "MIT",
   "repository": "hemanth/node-prepend-file",
