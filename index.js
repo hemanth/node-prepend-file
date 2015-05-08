@@ -1,6 +1,7 @@
 'use strict';
 var fs = require('fs');
 var util = require('util');
+var tempfile = require('tempfile');
 
 var DEBUG = process.env.NODE_DEBUG && /fs/.test(process.env.NODE_DEBUG);
 
@@ -60,7 +61,7 @@ module.exports = function prependFile(path, data, options) {
     throw new TypeError('Bad arguments');
   }
 
-  var tmp = process.env.TMPDIR + path;
+  var tmp = tempfile();
 
   var appendOptions = {
     encoding: options.encoding,
