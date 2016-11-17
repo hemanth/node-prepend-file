@@ -43,6 +43,10 @@ Asynchronously prepend data to a file, creating the file if it not yet exists. d
 
 The synchronous version of prependFile. Returns undefined.
 
+## Related
+
+* [prepend-file-cli](https://github.com/martinvd/prepend-file-cli)
+
 ## License
 
 MIT © [Hemanth.HM](http://h3manth.com)
