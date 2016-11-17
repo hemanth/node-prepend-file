@@ -1,7 +1,7 @@
 'use strict';
+
 var fs = require('fs');
 var util = require('util');
-var tempfile = require('tempfile');
 
 var DEBUG = process.env.NODE_DEBUG && /fs/.test(process.env.NODE_DEBUG);
 
@@ -30,20 +30,6 @@ function maybeCallback(callback) {
   return typeof callback === 'function' ? callback : rethrow();
 }
 
-function cutTmp(src, dest, options, callback) {
-  fs.createReadStream(src, options)
-    .on('error', function(err) {
-      callback(err);
-    })
-    .pipe(fs.createWriteStream(dest, options))
-    .on('error', function(err) {
-      callback(err);
-    })
-    .on('finish', function() {
-      fs.unlink(src, callback);
-    });
-}
-
 module.exports = function prependFile(path, data, options) {
   var callback = maybeCallback(arguments[arguments.length - 1]);
 
@@ -61,43 +47,29 @@ module.exports = function prependFile(path, data, options) {
     throw new TypeError('Bad arguments');
   }
 
-  var tmp = tempfile();
-
   var appendOptions = {
     encoding: options.encoding,
     mode: options.mode,
     flags: 'a'
   };
 
-  // a temp file is written even if dist file does not exist. PR welcome for better implementation.
-  fs.writeFile(tmp, data, options, function(err) {
-    if (err) {
-      callback(err);
-      return;
-    }
-
-    fs.createReadStream(path, options)
-      .on('error', function(err) {
-        if (err.code === 'ENOENT' /*file does not exist*/) {
-          fs.writeFile(path, data, options, function(err) {
-            if (err) {
-              callback(err);
-            } else {
-              callback();
-            }
-          });
-        } else {
-          callback(err);
-        }
-      })
-      .pipe(fs.createWriteStream(tmp, appendOptions))
-      .on('error', function(err) {
+  fs.createReadStream(path, options)
+    .on('error', function (err) {
+      if (err.code === 'ENOENT' /*file does not exist*/) {
+        fs.writeFile(path, data, options, function (err) {
+          if (err) {
+            callback(err);
+          } else {
+            callback();
+          }
+        });
+      } else {
         callback(err);
-      })
-      .on('finish', function() {
-        cutTmp(tmp, path, options, callback);
-      });
-  });
+      }
+    })
+    .on('finish', function() {
+      callback();
+    });
 };
 
 module.exports.sync = function sync(path, data, options) {
