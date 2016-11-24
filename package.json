@@ -33,6 +33,6 @@
     "mocha": "*"
   },
   "dependencies": {
-    "tempfile": "^1.1.1"
+    "tmp": "0.0.31"
   }
 }
