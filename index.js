@@ -53,6 +53,7 @@ module.exports = function prependFile(path, data, options) {
     flags: 'a'
   };
 
+  // a temp file is written even if dist file does not exist. PR welcome for better implementation.
   tmp
     .file(function (err, tempFilePath, fd, cleanupCallback) {
       if (err) {
