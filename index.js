@@ -1,37 +1,21 @@
 'use strict';
-var fs = require('fs');
-var util = require('util');
-var tmp = require('tmp');
 
-var DEBUG = process.env.NODE_DEBUG && /fs/.test(process.env.NODE_DEBUG);
+const fs = require('fs');
+const util = require('util');
+const tmp = require('tmp');
 
-function rethrow() {
-  // Only enable in debug mode. A backtrace uses ~1000 bytes of heap space and is fairly slow to generate.
-  if (DEBUG) {
-    var backtrace = new Error();
-    return function(err) {
-      if (err) {
-        backtrace.stack = err.name + ': ' + err.message +
-          backtrace.stack.substr(backtrace.name.length);
-        err = backtrace;
-        throw err;
-      }
-    };
-  }
+const helpers = require('./helpers');
+const fileExists = helpers.fileExists;
+const createFile = helpers.createFile;
+const createTempFile = helpers.createTempFile;
+const writeToFile = helpers.writeToFile;
+const writeFileContentsToFile = helpers.writeFileContentsToFile;
+const maybeCallback = helpers.maybeCallback;
 
-  return function(err) {
-    if (err) {
-      throw err; // Forgot a callback but don't know where? Use NODE_DEBUG=fs
-    }
-  };
-}
-
-function maybeCallback(callback) {
-  return typeof callback === 'function' ? callback : rethrow();
-}
+const FileExistsError = require('./file-exists-error').FileExistsError;
 
 module.exports = function prependFile(path, data, options) {
-  var callback = maybeCallback(arguments[arguments.length - 1]);
+  const callback = maybeCallback(arguments[arguments.length - 1]);
 
   if (typeof options === 'function' || !options) {
     options = {
@@ -47,61 +31,19 @@ module.exports = function prependFile(path, data, options) {
     throw new TypeError('Bad arguments');
   }
 
-  var appendOptions = {
-    encoding: options.encoding,
-    mode: options.mode,
-    flags: 'a'
-  };
-
-  // a temp file is written even if dist file does not exist. PR welcome for better implementation.
-  tmp
-    .file(function (err, tempFilePath, fd, cleanupCallback) {
-      if (err) {
-        callback(err);
-        return;
-      }
-
-      fs.writeFile(tempFilePath, data, options, function (err) {
-        if (err) {
-          callback(err);
-          return;
-        }
-
-        fs.createReadStream(path, options)
-          .on('error', function(err) {
-            if (err.code === 'ENOENT' /*file does not exist*/) {
-              fs.writeFile(path, data, options, function (err) {
-                if (err) {
-                  callback(err);
-                } else {
-                  callback();
-                }
-              });
-            } else {
-              callback(err);
-            }
-          })
-          .pipe(fs.createWriteStream(tempFilePath, appendOptions))
-          .on('error', function(err) {
-            callback(err);
-          })
-          .on('finish', function() {
-            fs.createReadStream(tempFilePath, options)
-              .on('error', function(err) {
-                callback(err);
-              })
-              .pipe(fs.createWriteStream(path, options))
-              .on('error', function(err) {
-                callback(err);
-              })
-              .on('finish', function() {
-                cleanupCallback();
-                callback();
-              });
-          });
-      });
-    });
+  fileExists(path)
+    .then(() => createTempFile())
+    .then(tempFile =>
+      writeToFile(tempFile.path, data, options)
+        .then(() => writeFileContentsToFile(path, tempFile.path, options, true))
+        .then(() => writeFileContentsToFile(tempFile.path, path, options))
+        .then(() => tempFile.cleanUpCallback())
+    )
+    .catch(FileExistsError => createFile(path, data, options))
+    .then(pathToWriteTo => callback())
+    .catch(err => callback(err));
 };
+
 
 module.exports.sync = function sync(path, data, options) {
   if (!options) {
