@@ -10,29 +10,32 @@
     "url": "http://h3manth.com"
   },
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=10.17 <11 || >=11.14"
   },
   "scripts": {
-    "coverage": "istanbul cover _mocha -- -R spec && rm -rf ./coverage",
-    "lint": "jshint *.js --exclude node_modules && jscs *.js",
-    "test": "mocha"
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "test": "xo && nyc ava"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "index.d.ts"
   ],
   "keywords": [
     "fs",
     "file",
     "prepend"
   ],
-  "devDependencies": {
-    "coveralls": "^2.11.2",
-    "istanbul": "^0.3.13",
-    "jscs": "^1.13.1",
-    "jshint": "^2.6.3",
-    "mocha": "*"
-  },
   "dependencies": {
-    "tmp": "0.0.31"
+    "path-exists": "^4.0.0",
+    "temp-write": "^4.0.0"
+  },
+  "devDependencies": {
+    "ava": "^3.11.0",
+    "coveralls": "^3.1.0",
+    "nyc": "^15.1.0",
+    "xo": "^0.32.1"
+  },
+  "xo": {
+    "space": 2
   }
 }
