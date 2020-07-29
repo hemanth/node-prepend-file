@@ -1,62 +1,42 @@
-#  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
+# prepend-file [![Build Status][travis-image]][travis-url] [![Code Coverage][coveralls-image]][coveralls-url]
 
-> Prepend data to a file, creating the file if it not yet exists.
-
+> Prepend data to a file, creating it if it doesn't exist.
 
 ## Install
 
 ```sh
-$ npm install --save prepend-file
+npm install prepend-file
 ```
 
 ## Usage
 
 ```js
-var prependFile = require('prepend-file');
+const prependFile = require('prepend-file');
 
-prependFile('message.txt', 'data to prepend', function (err) {
-	if (err) {
-		// Error
-	}
-
-	// Success
-	console.log('The "data to prepend" was prepended to file!');
+(async () => {
+  await prependFile('message.txt', 'some data');
 });
 ```
 
 ## API
 
-### prependFile(filename, data, [options], callback)
+### prependFile(filename, data)
 
-```
-    * filename String
-    * data String | Buffer
-    * options Object
-        encoding String | Null default = 'utf8'
-        mode Number default = 438 (aka 0666 in Octal)
-    * callback Function
-```
+### prependFile.sync(filename, data)
 
-Asynchronously prepend data to a file, creating the file if it not yet exists. The `data` can be a string or a buffer.
+#### filename
 
-### prependFile.sync(filename, data, [options])
+Type: `string`
 
-The synchronous version of `prependFile`. Returns `undefined`.
+The file to prepend the `data` to.
 
-## Related
+#### data
 
-* [prepend-file-cli](https://github.com/martinvd/prepend-file-cli)
+Type: `string | Buffer`
 
-## License
+The data to prepend.
 
-MIT © [Hemanth.HM](http://h3manth.com)
-
-
-[npm-image]: https://badge.fury.io/js/prepend-file.svg
-[npm-url]: https://npmjs.org/package/prepend-file
 [travis-image]: https://travis-ci.org/hemanth/node-prepend-file.svg?branch=master
 [travis-url]: https://travis-ci.org/hemanth/node-prepend-file
-[daviddm-image]: https://david-dm.org/hemanth/node-prepend-file.svg?theme=shields.io
-[daviddm-url]: https://david-dm.org/hemanth/node-prepend-file
 [coveralls-image]: https://coveralls.io/repos/hemanth/node-prepend-file/badge.svg
 [coveralls-url]: https://coveralls.io/r/hemanth/node-prepend-file
