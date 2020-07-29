@@ -1,4 +1,4 @@
-#  [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
+# prepend-file [![Build Status][travis-image]][travis-url] [![Code Coverage][coveralls-image]][coveralls-url]
 
 > Prepend data to a file, creating it if it doesn't exist.
 
@@ -36,11 +36,7 @@ Type: `string | Buffer`
 
 The data to prepend.
 
-[npm-image]: https://badge.fury.io/js/prepend-file.svg
-[npm-url]: https://npmjs.org/package/prepend-file
 [travis-image]: https://travis-ci.org/hemanth/node-prepend-file.svg?branch=master
 [travis-url]: https://travis-ci.org/hemanth/node-prepend-file
-[daviddm-image]: https://david-dm.org/hemanth/node-prepend-file.svg?theme=shields.io
-[daviddm-url]: https://david-dm.org/hemanth/node-prepend-file
 [coveralls-image]: https://coveralls.io/repos/hemanth/node-prepend-file/badge.svg
 [coveralls-url]: https://coveralls.io/r/hemanth/node-prepend-file
