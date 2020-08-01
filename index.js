@@ -1,10 +1,11 @@
 'use strict';
 const fs = require('fs');
+const stream = require('stream');
 const {promisify} = require('util');
 const tempWrite = require('temp-write');
 const pathExists = require('path-exists');
-const pipeline = promisify(require('stream').pipeline);
-const {Transform} = require('stream');
+const pipeline = promisify(stream.pipeline);
+const {Transform} = stream;
 
 function hasBOM(text) {
   return (text.toString().charCodeAt(0) === 0xFEFF);
