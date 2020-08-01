@@ -21,6 +21,12 @@ test('main', async t => {
 
   await prependFile(temporaryFile, Buffer.from('Yes '));
   t.is(await fsP.readFile(temporaryFile, 'utf8'), 'Yes Hello World');
+
+  await prependFile(temporaryFile, Buffer.from('\uFEFF'));
+  t.is(encodeURIComponent(await fsP.readFile(temporaryFile, 'utf8')), encodeURIComponent('\uFEFFYes Hello World'));
+
+  await prependFile(temporaryFile, Buffer.from('What '));
+  t.is(encodeURIComponent(await fsP.readFile(temporaryFile, 'utf8')), encodeURIComponent('\uFEFFWhat Yes Hello World'));
 });
 
 test('.sync', t => {
@@ -32,4 +38,10 @@ test('.sync', t => {
 
   prependFile.sync(syncTemporaryFile, Buffer.from('Yes '));
   t.is(fs.readFileSync(syncTemporaryFile, 'utf8'), 'Yes Hello World');
+
+  prependFile.sync(syncTemporaryFile, '\uFEFF');
+  t.is(encodeURIComponent(fs.readFileSync(syncTemporaryFile, 'utf8')), encodeURIComponent('\uFEFFYes Hello World'));
+
+  prependFile.sync(syncTemporaryFile, 'What ');
+  t.is(encodeURIComponent(fs.readFileSync(syncTemporaryFile, 'utf8')), encodeURIComponent('\uFEFFWhat Yes Hello World'));
 });
