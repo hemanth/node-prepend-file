@@ -20,36 +20,36 @@ function stripBOM(text) {
 }
 
 module.exports = async (filename, data) => {
-  let bomFound = false;
-  let bomPlaced = false;
-
-  const checkStripBomTransformer = new Transform({
-    transform(chunk, encoding, callback) {
-      let fileData = chunk;
-
-      if (!bomFound) {
-        bomFound = hasBOM(fileData);
-        fileData = hasBOM(fileData) ? stripBOM(fileData) : fileData;
-      }
-
-      callback(false, Buffer.from(fileData));
-    }
-  });
-
-  const checkPrependBomTransformer = new Transform({
-    transform(chunk, encoding, callback) {
-      let fileData = chunk.toString();
-
-      if (bomFound && !bomPlaced) {
-        fileData = prependBOM(fileData);
-        bomPlaced = true;
-      }
-
-      callback(false, Buffer.from(fileData));
-    }
-  });
-
   if (await pathExists(filename)) {
+    let bomFound = false;
+    let bomPlaced = false;
+
+    const checkStripBomTransformer = new Transform({
+      transform(chunk, _, callback) {
+        let fileData = chunk;
+
+        if (!bomFound) {
+          bomFound = hasBOM(fileData);
+          fileData = hasBOM(fileData) ? stripBOM(fileData) : fileData;
+        }
+
+        callback(false, Buffer.from(fileData));
+      }
+    });
+
+    const checkPrependBomTransformer = new Transform({
+      transform(chunk, _, callback) {
+        let fileData = chunk.toString();
+
+        if (bomFound && !bomPlaced) {
+          fileData = prependBOM(fileData);
+          bomPlaced = true;
+        }
+
+        callback(false, Buffer.from(fileData));
+      }
+    });
+
     const temporaryFile = await tempWrite(data);
 
     await pipeline(fs.createReadStream(filename), checkStripBomTransformer, fs.createWriteStream(temporaryFile, {flags: 'a'}));
