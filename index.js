@@ -19,6 +19,30 @@ function stripBOM(text) {
   return text.toString().slice(1);
 }
 
+function hasHashBang(text) {
+  return /^#![^\r\n]+/.test(text.toString());
+}
+
+function prependHashBang(text, bang) {
+  return bang + '\n\n' + text;
+}
+
+function extractHashBang(text) {
+  const m = /^(#![^\r\n]+)/.exec(text.toString());
+  return m ? m[0] : '';
+}
+
+function stripHashBang(text) {
+  let s = text.toString();
+  const m = /^(#![^\r\n]+[\r\n]+)/.exec(s);
+  if (m) {
+    const bang = m[0];
+    s = s.slice(bang.length);
+  }
+
+  return s;
+}
+
 module.exports = async (filename, data) => {
   if (await pathExists(filename)) {
     let bomFound = false;
@@ -50,10 +74,41 @@ module.exports = async (filename, data) => {
       }
     });
 
+    let bangFound = false;
+    let bangPlaced = false;
+    let bangCache = null;
+
+    const checkStripHashBangTransformer = new Transform({
+      transform(chunk, encoding, callback) {
+        let fileData = chunk;
+
+        if (!bangFound) {
+          bangFound = hasHashBang(fileData);
+          bangCache = extractHashBang(fileData);
+          fileData = bangFound ? stripHashBang(fileData) : fileData;
+        }
+
+        callback(false, Buffer.from(fileData));
+      }
+    });
+
+    const checkPrependHashBangTransformer = new Transform({
+      transform(chunk, encoding, callback) {
+        let fileData = chunk.toString();
+
+        if (bangFound && !bangPlaced) {
+          fileData = prependHashBang(fileData, bangCache);
+          bangPlaced = true;
+        }
+
+        callback(false, Buffer.from(fileData));
+      }
+    });
+
     const temporaryFile = await tempWrite(data);
 
-    await pipeline(fs.createReadStream(filename), checkStripBomTransformer, fs.createWriteStream(temporaryFile, {flags: 'a'}));
-    await pipeline(fs.createReadStream(temporaryFile), checkPrependBomTransformer, fs.createWriteStream(filename));
+    await pipeline(fs.createReadStream(filename), checkStripBomTransformer, checkStripHashBangTransformer, fs.createWriteStream(temporaryFile, {flags: 'a'}));
+    await pipeline(fs.createReadStream(temporaryFile), checkPrependHashBangTransformer, checkPrependBomTransformer, fs.createWriteStream(filename));
 
     await fs.promises.unlink(temporaryFile);
   } else {
