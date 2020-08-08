@@ -1,6 +1,8 @@
 # prepend-file [![Build Status][travis-image]][travis-url] [![Code Coverage][coveralls-image]][coveralls-url]
 
 > Prepend data to a file, creating it if it doesn't exist.
+> 
+> When the file (*to be prepended to*) has [a 'hash bang' a.k.a. *shebang* command](https://en.wikipedia.org/wiki/Shebang_(Unix)) at the first line, this will be kept intact.
 
 ## Install
 
