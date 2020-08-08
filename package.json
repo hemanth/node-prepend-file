@@ -19,7 +19,8 @@
   },
   "scripts": {
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "test": "xo && nyc ava"
+    "test": "xo && nyc ava",
+    "pub": "npm publish --access public"
   },
   "keywords": [
     "fs",
