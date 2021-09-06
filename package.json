@@ -27,7 +27,6 @@
     "prepend"
   ],
   "dependencies": {
-    "path-exists": "^4.0.0",
     "temp-write": "^4.0.0"
   },
   "devDependencies": {
