@@ -1,6 +1,6 @@
 {
   "name": "prepend-file",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Prepend data to a file, creating it if it doesn't exist.",
   "repository": "https://github.com/hemanth/node-prepend-file.git",
   "author": {
