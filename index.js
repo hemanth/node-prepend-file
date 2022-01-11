@@ -51,9 +51,13 @@ module.exports = async (filename, data) => {
   const temporaryFile = await tempWrite(data);
   try {
     await pipeline(fs.createReadStream(filename), checkStripBomTransformer, fs.createWriteStream(temporaryFile, {flags: 'a'}));
-  } catch {
-    await fs.promises.writeFile(filename, data);
-    return;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      await fs.promises.writeFile(filename, data);
+      return;
+    }
+
+    throw error;
   }
 
   await pipeline(fs.createReadStream(temporaryFile), checkPrependBomTransformer, fs.createWriteStream(filename));
@@ -64,9 +68,13 @@ module.exports.sync = (filename, data) => {
   let fileData;
   try {
     fileData = fs.readFileSync(filename);
-  } catch {
-    fs.writeFileSync(filename, data);
-    return;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      fs.writeFileSync(filename, data);
+      return;
+    }
+
+    throw error;
   }
 
   data = hasBOM(fileData) ? prependBOM(data) : data;
