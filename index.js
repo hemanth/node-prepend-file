@@ -3,7 +3,7 @@ const fs = require('fs');
 const stream = require('stream');
 const {promisify} = require('util');
 const tempWrite = require('temp-write');
-const pathExists = require('path-exists');
+const path = require('path');
 const pipeline = promisify(stream.pipeline);
 const {Transform} = stream;
 
@@ -20,56 +20,68 @@ function stripBOM(text) {
 }
 
 module.exports = async (filename, data) => {
-  if (await pathExists(filename)) {
-    let bomFound = false;
-    let bomPlaced = false;
+  let bomFound = false;
+  let bomPlaced = false;
 
-    const checkStripBomTransformer = new Transform({
-      transform(chunk, _, callback) {
-        let fileData = chunk;
+  const checkStripBomTransformer = new Transform({
+    transform(chunk, _, callback) {
+      let fileData = chunk;
 
-        if (!bomFound) {
-          bomFound = hasBOM(fileData);
-          fileData = hasBOM(fileData) ? stripBOM(fileData) : fileData;
-        }
-
-        callback(false, Buffer.from(fileData));
+      if (!bomFound) {
+        bomFound = hasBOM(fileData);
+        fileData = hasBOM(fileData) ? stripBOM(fileData) : fileData;
       }
-    });
 
-    const checkPrependBomTransformer = new Transform({
-      transform(chunk, _, callback) {
-        let fileData = chunk.toString();
+      callback(false, Buffer.from(fileData));
+    }
+  });
 
-        if (bomFound && !bomPlaced) {
-          fileData = prependBOM(fileData);
-          bomPlaced = true;
-        }
+  const checkPrependBomTransformer = new Transform({
+    transform(chunk, _, callback) {
+      let fileData = chunk.toString();
 
-        callback(false, Buffer.from(fileData));
+      if (bomFound && !bomPlaced) {
+        fileData = prependBOM(fileData);
+        bomPlaced = true;
       }
-    });
 
-    const temporaryFile = await tempWrite(data);
+      callback(false, Buffer.from(fileData));
+    }
+  });
 
+  filename = path.resolve(filename);
+  const temporaryFile = await tempWrite(data);
+
+  try {
     await pipeline(fs.createReadStream(filename), checkStripBomTransformer, fs.createWriteStream(temporaryFile, {flags: 'a'}));
-    await pipeline(fs.createReadStream(temporaryFile), checkPrependBomTransformer, fs.createWriteStream(filename));
+  } catch (error) {
+    if (error.code === 'ENOENT' && error.path === filename) {
+      await fs.promises.writeFile(filename, data);
+      return;
+    }
 
-    await fs.promises.unlink(temporaryFile);
-  } else {
-    await fs.promises.writeFile(filename, data);
+    throw error;
   }
+
+  await pipeline(fs.createReadStream(temporaryFile), checkPrependBomTransformer, fs.createWriteStream(filename));
+  await fs.promises.unlink(temporaryFile);
 };
 
 module.exports.sync = (filename, data) => {
-  if (pathExists.sync(filename)) {
-    let fileData = fs.readFileSync(filename);
+  let fileData;
+  try {
+    fileData = fs.readFileSync(filename);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      fs.writeFileSync(filename, data);
+      return;
+    }
 
-    data = hasBOM(fileData) ? prependBOM(data) : data;
-    fileData = hasBOM(fileData) ? stripBOM(fileData) : fileData;
-
-    fs.writeFileSync(filename, Buffer.concat([Buffer.from(data), Buffer.from(fileData)]));
-  } else {
-    fs.writeFileSync(filename, data);
+    throw error;
   }
+
+  data = hasBOM(fileData) ? prependBOM(data) : data;
+  fileData = hasBOM(fileData) ? stripBOM(fileData) : fileData;
+
+  fs.writeFileSync(filename, Buffer.concat([Buffer.from(data), Buffer.from(fileData)]));
 };
