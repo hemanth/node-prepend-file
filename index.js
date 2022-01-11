@@ -51,17 +51,17 @@ module.exports = async (filename, data) => {
   const temporaryFile = await tempWrite(data);
   try {
     await pipeline(fs.createReadStream(filename), checkStripBomTransformer, fs.createWriteStream(temporaryFile, {flags: 'a'}));
+    await pipeline(fs.createReadStream(temporaryFile), checkPrependBomTransformer, fs.createWriteStream(filename));
   } catch (error) {
-    if (error.code === 'ENOENT') {
+    if (error.code === 'ENOENT' && error.path === filename) {
       await fs.promises.writeFile(filename, data);
       return;
     }
 
     throw error;
+  } finally {
+    await fs.promises.unlink(temporaryFile);
   }
-
-  await pipeline(fs.createReadStream(temporaryFile), checkPrependBomTransformer, fs.createWriteStream(filename));
-  await fs.promises.unlink(temporaryFile);
 };
 
 module.exports.sync = (filename, data) => {
