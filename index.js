@@ -51,6 +51,7 @@ module.exports = async (filename, data) => {
 
   filename = path.resolve(filename);
   const temporaryFile = await tempWrite(data);
+
   try {
     await pipeline(fs.createReadStream(filename), checkStripBomTransformer, fs.createWriteStream(temporaryFile, {flags: 'a'}));
   } catch (error) {
