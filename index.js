@@ -3,6 +3,7 @@ const fs = require('fs');
 const stream = require('stream');
 const {promisify} = require('util');
 const tempWrite = require('temp-write');
+const path = require('path');
 const pipeline = promisify(stream.pipeline);
 const {Transform} = stream;
 
@@ -48,10 +49,10 @@ module.exports = async (filename, data) => {
     }
   });
 
+  filename = path.resolve(filename);
   const temporaryFile = await tempWrite(data);
   try {
     await pipeline(fs.createReadStream(filename), checkStripBomTransformer, fs.createWriteStream(temporaryFile, {flags: 'a'}));
-    await pipeline(fs.createReadStream(temporaryFile), checkPrependBomTransformer, fs.createWriteStream(filename));
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === filename) {
       await fs.promises.writeFile(filename, data);
@@ -59,9 +60,10 @@ module.exports = async (filename, data) => {
     }
 
     throw error;
-  } finally {
-    await fs.promises.unlink(temporaryFile);
   }
+
+  await pipeline(fs.createReadStream(temporaryFile), checkPrependBomTransformer, fs.createWriteStream(filename));
+  await fs.promises.unlink(temporaryFile);
 };
 
 module.exports.sync = (filename, data) => {
