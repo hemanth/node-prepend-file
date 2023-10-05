@@ -27,7 +27,7 @@
     "prepend"
   ],
   "dependencies": {
-    "temp-write": "^4.0.0"
+    "temp-write": "^5.0.0"
   },
   "devDependencies": {
     "ava": "^3.11.0",
