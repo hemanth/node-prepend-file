@@ -1,6 +1,6 @@
 {
   "name": "prepend-file",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Prepend data to a file, creating it if it doesn't exist.",
   "repository": "https://github.com/hemanth/node-prepend-file.git",
   "author": {
@@ -19,7 +19,7 @@
   },
   "scripts": {
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "test": "xo && nyc ava"
+    "test": "ava"
   },
   "keywords": [
     "fs",
@@ -27,13 +27,12 @@
     "prepend"
   ],
   "dependencies": {
-    "temp-write": "^5.0.0"
+    "temp-write": "^6.0.1"
   },
   "devDependencies": {
     "ava": "^3.11.0",
     "coveralls": "^3.1.0",
-    "nyc": "^15.1.0",
-    "xo": "^0.32.1"
+    "nyc": "^15.1.0"
   },
   "xo": {
     "space": 2

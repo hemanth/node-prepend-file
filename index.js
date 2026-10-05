@@ -2,7 +2,6 @@
 const fs = require('fs');
 const stream = require('stream');
 const {promisify} = require('util');
-const tempWrite = require('temp-write');
 const path = require('path');
 const pipeline = promisify(stream.pipeline);
 const {Transform} = stream;
@@ -50,6 +49,7 @@ module.exports = async (filename, data) => {
   });
 
   filename = path.resolve(filename);
+  const {default: tempWrite} = await import('temp-write');
   const temporaryFile = await tempWrite(data);
 
   try {
